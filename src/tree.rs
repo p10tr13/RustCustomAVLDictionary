@@ -27,7 +27,7 @@ impl Node {
             };
 
             (*ptr).key = key;
-            (*ptr).value = val;
+            ptr::write(&mut (*ptr).value, val);
             (*ptr).bl = 0;
             (*ptr).left = ptr::null_mut();
             (*ptr).right = ptr::null_mut();
@@ -216,4 +216,40 @@ pub unsafe fn insert(root: &mut *mut Node, key: u64, value: &str, h: &mut bool) 
             *h = false;
         }
     }
+}
+
+pub unsafe fn contains(mut root: *mut Node, key: u64) -> bool {
+    unsafe {
+        while !root.is_null() {
+            let cur_key = (*root).key;
+
+            if cur_key < key {
+                root = (*root).right;
+            } else if cur_key > key {
+                root = (*root).left;
+            }
+            else {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+pub unsafe fn find(mut root: *mut Node, key: u64) -> Option<*mut MyString> {
+    unsafe {
+        while !root.is_null() {
+            let current_key = (*root).key;
+
+            if key == current_key {
+                return Some(&mut (*root).value as *mut MyString);
+            } else if key < current_key {
+                root = (*root).left;
+            } else {
+                root = (*root).right;
+            }
+        }
+    }
+
+    None
 }
