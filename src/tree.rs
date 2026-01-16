@@ -142,3 +142,78 @@ unsafe fn rotate_rl(root: &mut *mut Node) {
         *root = y;
     }
 }
+
+unsafe fn balance_after_insert_left(root: &mut *mut Node, h: &mut bool) {
+    unsafe {
+        match (*(*root)).bl {
+            1 => {
+                let ptr = (*(*root)).left;
+                if (*ptr).bl == 1 || (*ptr).bl == 0 {
+                    rotate_ll(root);
+                } else {
+                    rotate_lr(root);
+                }
+                *h = false;
+            },
+            0 => {
+                (*(*root)).bl = 1;
+            },
+            -1 => {
+                (*(*root)).bl = 0;
+                *h = false;
+            },
+            _ => {}
+        }
+    }
+}
+
+unsafe fn balance_after_insert_right(root: &mut *mut Node, h: &mut bool) {
+    unsafe {
+        match (*(*root)).bl {
+            -1 => {
+                let ptr = (*(*root)).right;
+                if (*ptr).bl == -1 || (*ptr).bl == 0 {
+                    rotate_rr(root);
+                } else {
+                    rotate_rl(root);
+                }
+                *h = false;
+            },
+            0 => {
+                (*(*root)).bl = -1;
+            },
+            1 => {
+                (*(*root)).bl = 0;
+                *h = false;
+            },
+            _ => {}
+        }
+    }
+}
+
+pub unsafe fn insert(root: &mut *mut Node, key: u64, value: &str, h: &mut bool) {
+    if (*root).is_null() {
+        *root = Node::new(key, value);
+        *h = !(*root).is_null();
+        return;
+    }
+
+    unsafe {
+        if key < (*(*root)).key {
+            insert(&mut (*(*root)).left, key, value, h);
+            if *h {
+                balance_after_insert_left(root, h);
+            }
+        } else if key > (*(*root)).key {
+            insert(&mut (*(*root)).right, key, value, h);
+            if *h {
+                balance_after_insert_right(root, h);
+            }
+        } else {
+            if let Some(new_val) = MyString::from_str(value) {
+                (*(*root)).value = new_val;
+            }
+            *h = false;
+        }
+    }
+}
