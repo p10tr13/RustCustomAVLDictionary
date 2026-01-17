@@ -2,6 +2,22 @@ mod mem;
 pub mod mystring;
 pub mod tree;
 
+#[macro_export]
+macro_rules! dict {
+    ( $( $key:expr => $val:expr ),* $(,)? ) => {
+        {
+            let mut root: *mut $crate::tree::Node = std::ptr::null_mut();
+            let mut h = false;
+            unsafe {
+                $(
+                    $crate::tree::insert(&mut root, $key, $val, &mut h);
+                )*
+            }
+            root
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::tree::*;
@@ -288,6 +304,27 @@ mod tests {
             assert_eq!((*(*root).left).key, 2);
             assert_eq!((*(*(*root).left).left).key, 1);
             assert_eq!((*(*(*root).left).right).key, 3);
+        }
+    }
+
+    #[test]
+    fn test_macro_creates_dictionary() {
+        let root = dict! {
+                1 => "a",
+                2 => "b",
+                3  => "c"
+            };
+
+        unsafe {
+            assert!(!root.is_null());
+
+            assert!(contains(root, 1));
+            assert!(contains(root, 2));
+            assert!(contains(root, 3));
+            assert!(!contains(root, 4));
+
+            let val_ptr = find(root, 1).unwrap();
+            assert_eq!((*val_ptr).as_str(), "a");
         }
     }
 }
