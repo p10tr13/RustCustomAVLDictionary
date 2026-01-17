@@ -44,6 +44,16 @@ impl MyString {
             std::slice::from_raw_parts(self.ptr, self.len)
         }
     }
+
+    pub fn as_str(&self) -> &str {
+        unsafe {
+            let slice = std::slice::from_raw_parts(self.ptr, self.len);
+            match std::str::from_utf8(slice) {
+                Ok(s) => s,
+                Err(_) => "<invalid utf8>",
+            }
+        }
+    }
 }
 
 impl Drop for MyString {

@@ -178,4 +178,116 @@ mod tests {
             assert_eq!(contains(root, 8), false);
         }
     }
+
+    #[test]
+    fn test_delete_simple_leaf() {
+        unsafe {
+            let mut root: *mut Node = ptr::null_mut();
+            let mut h = false;
+            insert(&mut root, 10, "a", &mut h);
+            insert(&mut root, 5, "b", &mut h);
+
+            delete(&mut root, 5, &mut h);
+
+            assert!(contains(root, 10));
+            assert!(!contains(root, 5));
+            assert!((*root).left.is_null());
+        }
+    }
+
+    #[test]
+    fn test_delete_simple_with_one_child() {
+        unsafe {
+            let mut root: *mut Node = ptr::null_mut();
+            let mut h = false;
+
+            insert(&mut root, 10, "a", &mut h);
+            insert(&mut root, 5, "b", &mut h);
+
+            delete(&mut root, 10, &mut h);
+
+            assert!(!contains(root, 10));
+            assert!(contains(root, 5));
+            assert_eq!((*root).key, 5);
+        }
+    }
+
+    #[test]
+    fn test_delete_simple_with_two_children_and_balance() {
+        unsafe {
+            let mut root: *mut Node = ptr::null_mut();
+            let mut h = false;
+
+            insert(&mut root, 2, "b", &mut h);
+            insert(&mut root, 1, "a", &mut h);
+            insert(&mut root, 3, "c", &mut h);
+            insert(&mut root, 5, "e", &mut h);
+            insert(&mut root, 4, "d", &mut h);
+
+            delete(&mut root, 2, &mut h);
+
+            assert!(!contains(root, 2));
+            assert!(contains(root, 3));
+            assert!(contains(root, 1));
+            assert_eq!((*root).key, 3);
+        }
+    }
+
+    #[test]
+    fn test_ppt_delete() {
+        unsafe {
+            let mut root: *mut Node = ptr::null_mut();
+            let mut h = false;
+
+            insert(&mut root, 5, "b", &mut h);
+            insert(&mut root, 3, "d", &mut h);
+            insert(&mut root, 8, "h", &mut h);
+            insert(&mut root, 2, "f", &mut h);
+            insert(&mut root, 4, "i", &mut h);
+            insert(&mut root, 7, "c", &mut h);
+            insert(&mut root, 10, "j", &mut h);
+            insert(&mut root, 9, "k", &mut h);
+            insert(&mut root, 11, "l", &mut h);
+            insert(&mut root, 1, "g", &mut h);
+
+            assert_eq!((*root).key, 5);
+            assert_eq!((*(*root).left).key, 3);
+            assert_eq!((*(*root).right).key, 8);
+            assert_eq!((*(*(*root).right).right).key, 10);
+            assert_eq!((*(*(*root).left).left).key, 2);
+            assert_eq!((*(*(*(*root).left).left).left).key, 1);
+            assert_eq!((*(*(*root).left).right).key, 4);
+            assert_eq!((*(*(*root).right).left).key, 7);
+            assert_eq!((*(*(*(*root).right).right).left).key, 9);
+            assert_eq!((*(*(*(*root).right).right).right).key, 11);
+
+            h = false;
+            delete(&mut root, 4, &mut h);
+
+            assert_eq!((*root).key, 5);
+            assert_eq!((*(*root).left).key, 2);
+            assert_eq!((*(*(*root).left).left).key, 1);
+            assert_eq!((*(*(*root).left).right).key, 3);
+
+            h = false;
+            delete(&mut root, 8, &mut h);
+
+            assert_eq!((*root).key, 5);
+            assert_eq!((*(*root).right).key, 9);
+            assert_eq!((*(*(*root).right).left).key, 7);
+            assert_eq!((*(*(*root).right).right).key, 10);
+            assert_eq!((*(*(*(*root).right).right).right).key, 11);
+
+            h = false;
+            delete(&mut root, 5, &mut h);
+
+            assert_eq!((*root).key, 7);
+            assert_eq!((*(*root).right).key, 10);
+            assert_eq!((*(*(*root).right).left).key, 9);
+            assert_eq!((*(*(*root).right).right).key, 11);
+            assert_eq!((*(*root).left).key, 2);
+            assert_eq!((*(*(*root).left).left).key, 1);
+            assert_eq!((*(*(*root).left).right).key, 3);
+        }
+    }
 }

@@ -253,3 +253,141 @@ pub unsafe fn find(mut root: *mut Node, key: u64) -> Option<*mut MyString> {
 
     None
 }
+
+unsafe fn get_min(mut root: *mut Node) -> *mut Node {
+    unsafe {
+        while !(*root).left.is_null() {
+            root = (*root).left;
+        }
+    }
+    root
+}
+
+unsafe fn balance_after_delete_left(root: &mut *mut Node, h: &mut bool) {
+    unsafe {
+        match (*(*root)).bl {
+            1 => {
+                (*(*root)).bl = 0;
+                *h = true;
+            },
+            0 => {
+                (*(*root)).bl = -1;
+                *h = false;
+            },
+            -1 => {
+                let right_child = (*(*root)).right;
+
+                if (*right_child).bl <= 0 {
+                    rotate_rr(root);
+                } else {
+                    rotate_rl(root);
+                }
+
+                if (*right_child).bl == 0 {
+                    *h = false;
+                } else {
+                    *h = true;
+                }
+            },
+            _ => {}
+        }
+    }
+}
+
+unsafe fn balance_after_delete_right(root: &mut *mut Node, h: &mut bool) {
+    unsafe {
+        match (*(*root)).bl {
+            -1 => {
+                (*(*root)).bl = 0;
+                *h = true;
+            },
+            0 => {
+                (*(*root)).bl = 1;
+                *h = false;
+            },
+            1 => {
+                let left_child = (*(*root)).left;
+
+                if (*left_child).bl >= 0 {
+                    rotate_ll(root);
+                } else {
+                    rotate_lr(root);
+                }
+
+                if (*left_child).bl == 0 {
+                    *h = false;
+                } else {
+                    *h = true;
+                }
+            },
+            _ => {}
+        }
+    }
+}
+
+pub unsafe fn delete(root: &mut *mut Node, key: u64, h: &mut bool) {
+    if (*root).is_null() {
+        *h = false;
+        return;
+    }
+
+    unsafe {
+        if key < (*(*root)).key {
+            delete(&mut (*(*root)).left, key, h);
+            if *h {
+                balance_after_delete_left(root, h);
+            }
+        } else if key > (*(*root)).key {
+            delete(&mut (*(*root)).right, key, h);
+            if *h {
+                balance_after_delete_right(root, h);
+            }
+        } else {
+            if (*(*root)).left.is_null() || (*(*root)).right.is_null() {
+                let temp = *root;
+                if (*(*root)).left.is_null() {
+                    *root = (*(*root)).right;
+                } else {
+                    *root = (*(*root)).left;
+                }
+
+                ptr::drop_in_place(&mut (*temp).value);
+                free(temp);
+                *h = true;
+            } else {
+                let successor = get_min((*(*root)).right);
+
+                (*(*root)).key = (*successor).key;
+
+                ptr::drop_in_place(&mut (*(*root)).value);
+
+                if let Some(new_val) = (*successor).value.deep_clone() {
+                    ptr::write(&mut (*(*root)).value, new_val);
+                }
+
+                delete(&mut (*(*root)).right, (*successor).key, h);
+
+                if *h {
+                    balance_after_delete_right(root, h);
+                }
+            }
+        }
+    }
+}
+
+pub unsafe fn print_tree(root: *mut Node, level: usize) {
+    if root.is_null() {
+        return;
+    }
+    unsafe {
+        print_tree((*root).right, level + 1);
+
+        for _ in 0..level {
+            print!("    ");
+        }
+
+        println!("{} (bf={}) : {}", (*root).key, (*root).bl, (*root).value.as_str());
+
+        print_tree((*root).left, level + 1);
+    }
+}
