@@ -35,7 +35,7 @@ impl MyString {
 
             ptr::copy_nonoverlapping(self.ptr, new_ptr, self.len + 1);
 
-            Some(MyString { ptr: self.ptr, len: self.len })
+            Some(MyString { ptr: new_ptr, len: self.len })
         }
     }
 
