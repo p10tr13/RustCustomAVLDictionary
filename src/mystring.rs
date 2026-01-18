@@ -7,7 +7,7 @@ pub struct MyString {
 }
 
 impl MyString {
-    pub fn from_str(str: &str) -> Option<MyString> {
+    pub fn new(str: &str) -> Option<MyString> {
         let len = str.len();
 
         unsafe {
@@ -19,7 +19,7 @@ impl MyString {
 
             ptr::copy_nonoverlapping(str.as_ptr(), ptr, len);
 
-            *ptr.offset(len as isize) = 0;
+            *ptr.add(len) = 0;
 
             Some(MyString { ptr, len })
         }

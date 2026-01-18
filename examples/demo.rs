@@ -71,6 +71,7 @@ fn main() {
         println!("State of tree after deletion:");
         tree::print_tree(root, 0);
 
+        // 6. Free memory
         println!("\n--- 6. Freeing memory ---");
         free_dict(root);
         println!("Memory freed. END");

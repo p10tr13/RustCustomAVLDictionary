@@ -18,7 +18,7 @@ impl Node {
                 return ptr::null_mut();
             }
 
-            let val = match MyString::from_str(value) {
+            let val = match MyString::new(value) {
                 Some(v) => v,
                 None => {
                     free(ptr);
@@ -191,6 +191,7 @@ unsafe fn balance_after_insert_right(root: &mut *mut Node, h: &mut bool) {
     }
 }
 
+/// # Safety
 pub unsafe fn insert(root: &mut *mut Node, key: u64, value: &str, h: &mut bool) {
     if (*root).is_null() {
         *root = Node::new(key, value);
@@ -210,7 +211,7 @@ pub unsafe fn insert(root: &mut *mut Node, key: u64, value: &str, h: &mut bool) 
                 balance_after_insert_right(root, h);
             }
         } else {
-            if let Some(new_val) = MyString::from_str(value) {
+            if let Some(new_val) = MyString::new(value) {
                 (*(*root)).value = new_val;
             }
             *h = false;
@@ -218,6 +219,7 @@ pub unsafe fn insert(root: &mut *mut Node, key: u64, value: &str, h: &mut bool) 
     }
 }
 
+/// # Safety
 pub unsafe fn contains(mut root: *mut Node, key: u64) -> bool {
     unsafe {
         while !root.is_null() {
@@ -236,6 +238,7 @@ pub unsafe fn contains(mut root: *mut Node, key: u64) -> bool {
     false
 }
 
+/// # Safety
 pub unsafe fn find(mut root: *mut Node, key: u64) -> Option<*mut MyString> {
     unsafe {
         while !root.is_null() {
@@ -283,11 +286,7 @@ unsafe fn balance_after_delete_left(root: &mut *mut Node, h: &mut bool) {
                     rotate_rl(root);
                 }
 
-                if (*right_child).bl == 0 {
-                    *h = false;
-                } else {
-                    *h = true;
-                }
+                *h = (*right_child).bl != 0;
             },
             _ => {}
         }
@@ -314,17 +313,49 @@ unsafe fn balance_after_delete_right(root: &mut *mut Node, h: &mut bool) {
                     rotate_lr(root);
                 }
 
-                if (*left_child).bl == 0 {
-                    *h = false;
-                } else {
-                    *h = true;
-                }
+                *h = (*left_child).bl != 0;
             },
             _ => {}
         }
     }
 }
 
+unsafe fn remove_node_simple(root: &mut *mut Node, h: &mut bool) {
+    unsafe {
+        let temp = *root;
+        if (*(*root)).left.is_null() {
+            *root = (*(*root)).right;
+        } else {
+            *root = (*(*root)).left;
+        }
+
+        ptr::drop_in_place(&mut (*temp).value);
+        free(temp);
+        *h = true;
+    }
+}
+
+unsafe fn remove_node_two_children(root: &mut *mut Node, h: &mut bool) {
+    unsafe {
+        let successor = get_min((*(*root)).right);
+
+        (*(*root)).key = (*successor).key;
+
+        ptr::drop_in_place(&mut (*(*root)).value);
+
+        if let Some(new_val) = (*successor).value.deep_clone() {
+            ptr::write(&mut (*(*root)).value, new_val);
+        }
+
+        delete(&mut (*(*root)).right, (*successor).key, h);
+
+        if *h {
+            balance_after_delete_right(root, h);
+        }
+    }
+}
+
+/// # Safety
 pub unsafe fn delete(root: &mut *mut Node, key: u64, h: &mut bool) {
     if (*root).is_null() {
         *h = false;
@@ -342,39 +373,15 @@ pub unsafe fn delete(root: &mut *mut Node, key: u64, h: &mut bool) {
             if *h {
                 balance_after_delete_right(root, h);
             }
+        } else if (*(*root)).left.is_null() || (*(*root)).right.is_null() {
+            remove_node_simple(root, h);
         } else {
-            if (*(*root)).left.is_null() || (*(*root)).right.is_null() {
-                let temp = *root;
-                if (*(*root)).left.is_null() {
-                    *root = (*(*root)).right;
-                } else {
-                    *root = (*(*root)).left;
-                }
-
-                ptr::drop_in_place(&mut (*temp).value);
-                free(temp);
-                *h = true;
-            } else {
-                let successor = get_min((*(*root)).right);
-
-                (*(*root)).key = (*successor).key;
-
-                ptr::drop_in_place(&mut (*(*root)).value);
-
-                if let Some(new_val) = (*successor).value.deep_clone() {
-                    ptr::write(&mut (*(*root)).value, new_val);
-                }
-
-                delete(&mut (*(*root)).right, (*successor).key, h);
-
-                if *h {
-                    balance_after_delete_right(root, h);
-                }
-            }
+            remove_node_two_children(root, h);
         }
     }
 }
 
+/// # Safety
 pub unsafe fn print_tree(root: *mut Node, level: usize) {
     if root.is_null() {
         return;

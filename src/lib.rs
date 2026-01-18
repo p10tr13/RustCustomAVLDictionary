@@ -2,6 +2,8 @@ mod mem;
 pub mod mystring;
 pub mod tree;
 
+pub mod c_api;
+
 #[macro_export]
 macro_rules! dict {
     ( $( $key:expr => $val:expr ),* $(,)? ) => {
