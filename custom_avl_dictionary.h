@@ -5,7 +5,7 @@
 
 typedef struct Dict Dict;
 
-Dict* dict();
+Dict* dict(void);
 
 void dict_insert(Dict** root, uint64_t key, const char* value);
 

@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include "custom_avl_dictionary.h"
 
-int main() {
+int main(void) {
     printf("=== AVL LIB (C) DEMO ===\n");
 
     // 1. Creating new dict
@@ -30,21 +31,21 @@ int main() {
     uint64_t search_key = 2;
     const char* result = dict_find(root, search_key);
     if (result != NULL) {
-        printf("Key %llu: Val -> '%s'.\n", search_key, result);
+        printf("Key %" PRIu64 ": Val -> '%s'.\n", search_key, result);
     } else {
-        printf("Key %llu not found.\n", search_key);
+        printf("Key %" PRIu64 " not found.\n", search_key);
     }
 
     search_key = 100; // Non present in dictionary
     result = dict_find(root, search_key);
     if (result != NULL) {
-         printf("Key %llu: Val -> '%s'.\n", search_key, result);
+         printf("Key %" PRIu64 ": Val -> '%s'.\n", search_key, result);
     } else {
-         printf("Key %llu not found.\n", search_key);
+         printf("Key %" PRIu64 " not found.\n", search_key);
     }
 
     // 4. Contains
-    printf("\n--- 4. Checking weather certain node is present using contains ---\n");
+    printf("\n--- 4. Checking whether a key is present using contains ---\n");
 
     printf("Is key 1 present?");
     if (dict_contains(root, 1)) {

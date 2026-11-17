@@ -3,6 +3,9 @@ pub mod mystring;
 pub mod tree;
 
 pub mod c_api;
+mod dictionary;
+
+pub use dictionary::Dictionary;
 
 #[macro_export]
 macro_rules! dict {

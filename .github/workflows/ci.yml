@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Tests and Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: Format
+        run: cargo fmt --check
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test
+      - name: Rust demo
+        run: cargo run --example demo
+
+  miri:
+    name: Miri (undefined behaviour check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri
+      - name: Miri tests
+        run: cargo miri test
+      - name: Miri demo
+        run: cargo miri run --example demo
+
+  c-api:
+    name: C API (gcc + Valgrind)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Valgrind
+        run: sudo apt-get update && sudo apt-get install -y valgrind
+      - name: Build the static library
+        run: cargo build --release
+      - name: Build the C demo
+        run: gcc -Wall -Wextra -o demo_c main.c -Ltarget/release -lproject_custom_avl_dictionary -lpthread -ldl -lm
+      - name: Run the C demo under Valgrind
+        run: valgrind --leak-check=full --error-exitcode=1 ./demo_c

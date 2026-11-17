@@ -339,15 +339,21 @@ unsafe fn remove_node_two_children(root: &mut *mut Node, h: &mut bool) {
     unsafe {
         let successor = get_min((*(*root)).right);
 
-        (*(*root)).key = (*successor).key;
+        // Copy the successor's value before touching this node, so a failed
+        // allocation leaves the tree unchanged instead of with a freed value.
+        let new_val = match (*successor).value.deep_clone() {
+            Some(v) => v,
+            None => {
+                *h = false;
+                return;
+            }
+        };
 
-        ptr::drop_in_place(&mut (*(*root)).value);
+        let successor_key = (*successor).key;
+        (*(*root)).key = successor_key;
+        (*(*root)).value = new_val;
 
-        if let Some(new_val) = (*successor).value.deep_clone() {
-            ptr::write(&mut (*(*root)).value, new_val);
-        }
-
-        delete(&mut (*(*root)).right, (*successor).key, h);
+        delete(&mut (*(*root)).right, successor_key, h);
 
         if *h {
             balance_after_delete_right(root, h);
