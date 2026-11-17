@@ -13,11 +13,11 @@ macro_rules! dict {
         {
             let mut root: *mut $crate::tree::Node = std::ptr::null_mut();
             let mut h = false;
-            unsafe {
-                $(
-                    $crate::tree::insert(&mut root, $key, $val, &mut h);
-                )*
-            }
+            $(
+                let key: u64 = $key;
+                let value: &str = $val;
+                unsafe { $crate::tree::insert(&mut root, key, value, &mut h) };
+            )*
             root
         }
     };
@@ -195,14 +195,14 @@ mod tests {
             insert(&mut root, 3, "d", &mut h);
             insert(&mut root, 6, "e", &mut h);
 
-            assert_eq!(contains(root, 1), true);
-            assert_eq!(contains(root, 2), true);
-            assert_eq!(contains(root, 3), true);
-            assert_eq!(contains(root, 4), true);
-            assert_eq!(contains(root, 5), true);
-            assert_eq!(contains(root, 6), true);
-            assert_eq!(contains(root, 7), true);
-            assert_eq!(contains(root, 8), false);
+            assert!(contains(root, 1));
+            assert!(contains(root, 2));
+            assert!(contains(root, 3));
+            assert!(contains(root, 4));
+            assert!(contains(root, 5));
+            assert!(contains(root, 6));
+            assert!(contains(root, 7));
+            assert!(!contains(root, 8));
             crate::c_api::dict_clear(root);
         }
     }

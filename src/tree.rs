@@ -286,7 +286,9 @@ unsafe fn balance_after_delete_left(root: &mut *mut Node, h: &mut bool) {
                     rotate_rl(root);
                 }
 
-                *h = (*right_child).bl != 0;
+                // The subtree got shorter unless a single rotation around a
+                // balanced child left the new root leaning (bl != 0).
+                *h = (*(*root)).bl == 0;
             },
             _ => {}
         }
@@ -313,7 +315,8 @@ unsafe fn balance_after_delete_right(root: &mut *mut Node, h: &mut bool) {
                     rotate_lr(root);
                 }
 
-                *h = (*left_child).bl != 0;
+                // See balance_after_delete_left.
+                *h = (*(*root)).bl == 0;
             },
             _ => {}
         }

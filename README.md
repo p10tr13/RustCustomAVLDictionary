@@ -48,7 +48,7 @@ The pointer returned by `dict_find` stays valid until that key is deleted or the
 
 ## Building and running
 
-Requires Rust 1.85 or newer (edition 2024).
+Requires Rust 1.87 or newer.
 
 ```bash
 cargo test                      # unit tests and randomized tests against BTreeMap

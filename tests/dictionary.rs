@@ -46,7 +46,7 @@ fn random_operations_match_btreemap_and_keep_the_tree_balanced() {
 
     for i in 0..operations {
         let key = rng.next() % 200;
-        if rng.next() % 3 == 0 {
+        if rng.next().is_multiple_of(3) {
             assert_eq!(dict.remove(key), reference.remove(&key).is_some());
         } else {
             let value = format!("value-{i}");
