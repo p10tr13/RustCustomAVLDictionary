@@ -48,6 +48,7 @@ mod tests {
             let slice = std::slice::from_raw_parts(val_str.ptr, val_str.len);
             let s = std::str::from_utf8(slice).unwrap();
             assert_eq!(s, "a");
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -66,6 +67,7 @@ mod tests {
             let s = std::str::from_utf8(slice).unwrap();
 
             assert_eq!(s, "new");
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -86,6 +88,7 @@ mod tests {
             assert_eq!((*root).bl, 0, "Root should be balanced");
             assert_eq!((*(*root).left).bl, 0);
             assert_eq!((*(*root).right).bl, 0);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -111,6 +114,7 @@ mod tests {
             assert_eq!((*(*root).right).bl, 0);
             assert_eq!((*(*(*root).left).right).bl, 0);
             assert_eq!((*(*(*root).left).left).bl, 0);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -140,6 +144,7 @@ mod tests {
             assert_eq!((*(*(*root).left).right).bl, 0);
             assert_eq!((*(*(*root).left).left).bl, 0);
             assert_eq!((*(*(*root).right).right).bl, 0);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -172,6 +177,7 @@ mod tests {
             assert_eq!((*(*(*root).left).left).bl, 0);
             assert_eq!((*(*(*root).right).right).bl, 0);
             assert_eq!((*(*(*root).right).left).bl, 0);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -197,6 +203,7 @@ mod tests {
             assert_eq!(contains(root, 6), true);
             assert_eq!(contains(root, 7), true);
             assert_eq!(contains(root, 8), false);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -213,6 +220,7 @@ mod tests {
             assert!(contains(root, 10));
             assert!(!contains(root, 5));
             assert!((*root).left.is_null());
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -230,6 +238,7 @@ mod tests {
             assert!(!contains(root, 10));
             assert!(contains(root, 5));
             assert_eq!((*root).key, 5);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -251,6 +260,7 @@ mod tests {
             assert!(contains(root, 3));
             assert!(contains(root, 1));
             assert_eq!((*root).key, 3);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -309,6 +319,7 @@ mod tests {
             assert_eq!((*(*root).left).key, 2);
             assert_eq!((*(*(*root).left).left).key, 1);
             assert_eq!((*(*(*root).left).right).key, 3);
+            crate::c_api::dict_clear(root);
         }
     }
 
@@ -330,6 +341,7 @@ mod tests {
 
             let val_ptr = find(root, 1).unwrap();
             assert_eq!((*val_ptr).as_str(), "a");
+            crate::c_api::dict_clear(root);
         }
     }
 }
