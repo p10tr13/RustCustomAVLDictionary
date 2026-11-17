@@ -80,7 +80,7 @@ demo_c.exe
 
 - **Unit tests** (`src/lib.rs`) cover each rotation, updates, and deletion of leaves, nodes with one child and nodes with two children.
 - **Randomized tests** (`tests/dictionary.rs`) run thousands of random inserts and deletes against `std::collections::BTreeMap` and check after every batch that the tree is still ordered and balanced. A second test inserts 100,000 sorted keys and checks that the height stays within the AVL bound of about 1.44 log2 n.
-- **CI** runs formatting, Clippy with warnings as errors, the tests, both demos, the whole suite under Miri, and the C demo under Valgrind with leak checking.
+- **CI** runs Clippy with warnings as errors, the tests, both demos, the whole suite under Miri, and the C demo under Valgrind with leak checking.
 
 ## Project structure
 
